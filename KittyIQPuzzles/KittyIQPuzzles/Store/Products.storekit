@@ -1,0 +1,45 @@
+{
+  "identifier" : "KittyIQ Puzzles Products",
+  "nonRenewableSubscriptions" : [],
+  "products" : [
+    {
+      "displayPrice" : "4.99",
+      "familyShareable" : true,
+      "internalID" : "premium_001",
+      "localizations" : [
+        {
+          "description" : "Unlock all worlds, outfits, and features forever",
+          "displayName" : "KittyIQ Premium",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.kittyiq.puzzles.premium",
+      "referenceName" : "KittyIQ Premium",
+      "type" : "NonConsumable"
+    },
+    {
+      "displayPrice" : "1.99",
+      "familyShareable" : false,
+      "internalID" : "coinpack_001",
+      "localizations" : [
+        {
+          "description" : "500 Fish Coins for hints and cosmetics",
+          "displayName" : "500 Fish Coins",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.kittyiq.puzzles.coinpack",
+      "referenceName" : "Fish Coin Pack",
+      "type" : "Consumable"
+    }
+  ],
+  "settings" : {
+    "_applicationInternalID" : "kittyiq-puzzles",
+    "_developerTeamID" : "TEAM_ID"
+  },
+  "subscriptionGroups" : [],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}
