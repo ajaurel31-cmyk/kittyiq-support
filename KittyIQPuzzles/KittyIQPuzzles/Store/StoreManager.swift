@@ -1,6 +1,8 @@
 import StoreKit
 import SwiftUI
 
+private typealias StoreTransaction = StoreKit.Transaction
+
 @MainActor
 class StoreManager: ObservableObject {
     @Published var isPremium: Bool = false
@@ -94,7 +96,7 @@ class StoreManager: ObservableObject {
 
     private func listenForTransactions() -> Task<Void, Error> {
         Task.detached {
-            for await result in Transaction.updates {
+            for await result in StoreTransaction.updates {
                 do {
                     let transaction = try self.checkVerified(result)
                     await self.handleTransaction(transaction)
@@ -106,7 +108,7 @@ class StoreManager: ObservableObject {
         }
     }
 
-    private func handleTransaction(_ transaction: Transaction) async {
+    private func handleTransaction(_ transaction: StoreTransaction) async {
         if transaction.productID == StoreManager.premiumProductId {
             isPremium = true
             UserDefaults.standard.set(true, forKey: "isPremium")
@@ -123,7 +125,7 @@ class StoreManager: ObservableObject {
     }
 
     private func updatePurchaseStatus() async {
-        for await result in Transaction.currentEntitlements {
+        for await result in StoreTransaction.currentEntitlements {
             if case .verified(let transaction) = result {
                 if transaction.productID == StoreManager.premiumProductId {
                     isPremium = true
