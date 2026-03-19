@@ -303,7 +303,7 @@ struct SlidingGridView: View {
                 } label: {
                     ZStack {
                         RoundedRectangle(cornerRadius: 10)
-                            .fill(engine.tiles[index] == 0 ? Color.clear : AppTheme.heroGradient)
+                            .fill(engine.tiles[index] == 0 ? AnyShapeStyle(Color.clear) : AnyShapeStyle(AppTheme.heroGradient))
                             .aspectRatio(1, contentMode: .fit)
 
                         if engine.tiles[index] != 0 {
