@@ -23,6 +23,7 @@
 		A1000014 /* StoreManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000014; };
 		A1000015 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B1000015; };
 		A1000016 /* Products.storekit in Resources */ = {isa = PBXBuildFile; fileRef = B1000016; };
+		A1000017 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1000018; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -43,6 +44,7 @@
 		B1000015 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B1000016 /* Products.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Products.storekit; sourceTree = "<group>"; };
 		B1000017 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B1000018 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		B1000020 /* KittyIQPuzzles.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = KittyIQPuzzles.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -69,6 +71,7 @@
 			isa = PBXGroup;
 			children = (
 				B1000001 /* KittyIQPuzzlesApp.swift */,
+				B1000018 /* Theme.swift */,
 				B1000017 /* Info.plist */,
 				B1000015 /* Assets.xcassets */,
 				D1000003 /* Views */,
@@ -213,6 +216,7 @@
 				A1000012 /* WorldBuilder.swift in Sources */,
 				A1000013 /* PuzzleEngine.swift in Sources */,
 				A1000014 /* StoreManager.swift in Sources */,
+				A1000017 /* Theme.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
