@@ -7,40 +7,49 @@ struct WorldMapView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 16) {
-                    // Header with cat + coins
-                    HStack {
-                        Text(gameState.equippedOutfit.emoji)
-                            .font(.system(size: 44))
-                        VStack(alignment: .leading) {
+                VStack(spacing: 20) {
+                    // Hero header card
+                    HStack(spacing: 14) {
+                        // Cat avatar circle
+                        ZStack {
+                            Circle()
+                                .fill(AppTheme.heroGradient)
+                                .frame(width: 56, height: 56)
+                            Text(gameState.equippedOutfit.emoji)
+                                .font(.system(size: 28))
+                        }
+
+                        VStack(alignment: .leading, spacing: 2) {
                             Text("Whiskers")
-                                .font(.title2.bold())
-                            HStack(spacing: 4) {
-                                Text("🐟")
+                                .font(.title3.weight(.semibold))
+                                .foregroundColor(AppTheme.textPrimary)
+                            HStack(spacing: 6) {
+                                Image(systemName: "dollarsign.circle.fill")
+                                    .foregroundColor(AppTheme.coinColor)
+                                    .font(.subheadline)
                                 Text("\(gameState.fishCoins)")
-                                    .font(.headline)
-                                    .foregroundColor(.orange)
+                                    .font(.subheadline.weight(.medium))
+                                    .foregroundColor(AppTheme.textSecondary)
                             }
                         }
+
                         Spacer()
+
                         StreakBadge(streak: gameState.currentStreak)
                     }
-                    .padding()
-                    .background(
-                        RoundedRectangle(cornerRadius: 20)
-                            .fill(.ultraThinMaterial)
-                    )
+                    .padding(16)
+                    .glassCard()
                     .padding(.horizontal)
 
-                    // World Cards
+                    // World cards
                     ForEach(gameState.worlds) { world in
                         WorldCard(world: world)
                     }
                 }
                 .padding(.vertical)
             }
-            .background(Color(.systemGroupedBackground))
-            .navigationTitle("KittyIQ Puzzles")
+            .background(AppTheme.surface.ignoresSafeArea())
+            .navigationTitle("KittyIQ")
         }
     }
 }
@@ -54,7 +63,6 @@ struct WorldCard: View {
 
     private var isAccessible: Bool {
         if !world.requiresPremium { return true }
-        // World 2 first 5 levels are free
         if world.id == 2 { return true }
         return storeManager.isPremium
     }
@@ -71,47 +79,57 @@ struct WorldCard: View {
                 PremiumUpsellView()
             }
         } label: {
-            HStack(spacing: 16) {
-                Text(world.emoji)
-                    .font(.system(size: 40))
-                    .frame(width: 60, height: 60)
-                    .background(
-                        RoundedRectangle(cornerRadius: 14)
-                            .fill(isAccessible ? Color.orange.opacity(0.15) : Color.gray.opacity(0.1))
-                    )
+            HStack(spacing: 14) {
+                // World icon with themed gradient
+                ZStack {
+                    RoundedRectangle(cornerRadius: 14)
+                        .fill(AppTheme.worldGradient(for: world.theme))
+                        .frame(width: 52, height: 52)
+                    Image(systemName: AppTheme.worldIcon(for: world.theme))
+                        .font(.title3.weight(.semibold))
+                        .foregroundColor(.white)
+                }
 
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack {
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(spacing: 6) {
                         Text(world.name)
-                            .font(.headline)
-                            .foregroundColor(.primary)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundColor(AppTheme.textPrimary)
                         if world.requiresPremium && !storeManager.isPremium {
                             Image(systemName: "lock.fill")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
+                                .font(.system(size: 10))
+                                .foregroundColor(AppTheme.textSecondary)
                         }
                     }
-                    Text("\(completedCount)/\(world.levels.count) levels")
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
 
-                    // Star progress
+                    Text("\(completedCount)/\(world.levels.count) levels")
+                        .font(.caption)
+                        .foregroundColor(AppTheme.textSecondary)
+
+                    // Star progress bar
                     let totalStars = world.levels.reduce(0) { $0 + (gameState.starsForLevel("\(world.id)-\($1.id)")) }
                     let maxStars = world.levels.count * 3
-                    ProgressView(value: Double(totalStars), total: Double(maxStars))
-                        .tint(.orange)
+                    GeometryReader { geo in
+                        ZStack(alignment: .leading) {
+                            Capsule()
+                                .fill(AppTheme.accent.opacity(0.12))
+                                .frame(height: 4)
+                            Capsule()
+                                .fill(AppTheme.worldColor(for: world.theme))
+                                .frame(width: maxStars > 0 ? geo.size.width * CGFloat(totalStars) / CGFloat(maxStars) : 0, height: 4)
+                        }
+                    }
+                    .frame(height: 4)
                 }
 
                 Spacer()
+
                 Image(systemName: "chevron.right")
-                    .foregroundColor(.secondary)
+                    .font(.caption.weight(.semibold))
+                    .foregroundColor(AppTheme.textSecondary.opacity(0.5))
             }
-            .padding()
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(.white)
-                    .shadow(color: .black.opacity(0.04), radius: 4, y: 2)
-            )
+            .padding(14)
+            .solidCard()
             .padding(.horizontal)
         }
     }
@@ -123,17 +141,24 @@ struct StreakBadge: View {
     let streak: Int
 
     var body: some View {
-        VStack(spacing: 2) {
-            Text("🔥")
-                .font(.title3)
+        HStack(spacing: 4) {
+            Image(systemName: "flame.fill")
+                .font(.subheadline)
+                .foregroundColor(.white)
             Text("\(streak)")
-                .font(.caption.bold())
-                .foregroundColor(.orange)
+                .font(.subheadline.weight(.bold))
+                .foregroundColor(.white)
         }
-        .frame(width: 50, height: 50)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
         .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color.orange.opacity(0.1))
+            Capsule()
+                .fill(
+                    LinearGradient(
+                        colors: [Color(red: 1.0, green: 0.45, blue: 0.2), Color(red: 1.0, green: 0.3, blue: 0.35)],
+                        startPoint: .topLeading, endPoint: .bottomTrailing
+                    )
+                )
         )
     }
 }

@@ -21,25 +21,36 @@ struct PuzzleView: View {
     }
 
     var body: some View {
-        VStack(spacing: 16) {
-            // Header
+        VStack(spacing: 0) {
+            // Header bar
             HStack {
-                VStack(alignment: .leading) {
+                VStack(alignment: .leading, spacing: 2) {
                     Text("Level \(level.id)")
-                        .font(.headline)
+                        .font(.headline.weight(.semibold))
+                        .foregroundColor(AppTheme.textPrimary)
                     Text(level.puzzleType.rawValue)
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .font(.caption)
+                        .foregroundColor(AppTheme.textSecondary)
                 }
                 Spacer()
                 HStack(spacing: 4) {
-                    Text("🐟")
-                    Text("+\(level.fishCoinReward)")
-                        .font(.headline)
-                        .foregroundColor(.orange)
+                    Image(systemName: "plus.circle.fill")
+                        .foregroundColor(AppTheme.coinColor)
+                        .font(.subheadline)
+                    Text("\(level.fishCoinReward)")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundColor(AppTheme.coinColor)
                 }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(
+                    Capsule().fill(AppTheme.coinColor.opacity(0.12))
+                )
             }
             .padding(.horizontal)
+            .padding(.top, 8)
+
+            Spacer()
 
             // Puzzle area
             Group {
@@ -52,25 +63,36 @@ struct PuzzleView: View {
                     SlidingGridView(engine: slidingEngine, gridSize: level.difficulty.gridSize)
                 }
             }
-            .padding()
-
-            // Move counter
-            HStack {
-                Text("Moves: \(currentMoves)")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                Spacer()
-                Text(level.difficulty.label)
-                    .font(.caption)
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 4)
-                    .background(Capsule().fill(Color.orange.opacity(0.15)))
-                    .foregroundColor(.orange)
-            }
             .padding(.horizontal)
 
             Spacer()
+
+            // Bottom stats bar
+            HStack {
+                HStack(spacing: 6) {
+                    Image(systemName: "arrow.triangle.swap")
+                        .font(.caption)
+                        .foregroundColor(AppTheme.textSecondary)
+                    Text("\(currentMoves) moves")
+                        .font(.subheadline.weight(.medium))
+                        .foregroundColor(AppTheme.textPrimary)
+                }
+
+                Spacer()
+
+                Text(level.difficulty.label)
+                    .font(.caption.weight(.semibold))
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 5)
+                    .background(
+                        Capsule().fill(AppTheme.accent.opacity(0.1))
+                    )
+                    .foregroundColor(AppTheme.accent)
+            }
+            .padding(.horizontal)
+            .padding(.bottom, 16)
         }
+        .background(AppTheme.surface.ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
         .onChange(of: isComplete) { _, complete in
             if complete {
@@ -140,28 +162,38 @@ struct MatchingGridView: View {
         LazyVGrid(columns: columns, spacing: 8) {
             ForEach(engine.tiles) { tile in
                 Button {
-                    withAnimation(.easeInOut(duration: 0.3)) {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
                         engine.selectTile(at: tile.id)
                     }
                 } label: {
                     ZStack {
-                        RoundedRectangle(cornerRadius: 10)
-                            .fill(tile.isMatched ? Color.green.opacity(0.3) : (tile.isRevealed ? Color.orange.opacity(0.2) : Color.orange))
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(tileBackground(tile))
                             .aspectRatio(1, contentMode: .fit)
 
                         if tile.isRevealed || tile.isMatched {
                             Text(tile.emoji)
                                 .font(.system(size: tileEmojiSize))
-                                .transition(.scale)
+                                .transition(.scale.combined(with: .opacity))
                         } else {
-                            Text("🐾")
-                                .font(.system(size: tileEmojiSize * 0.7))
-                                .opacity(0.5)
+                            Image(systemName: "pawprint.fill")
+                                .font(.system(size: tileEmojiSize * 0.5))
+                                .foregroundColor(.white.opacity(0.5))
                         }
                     }
                 }
                 .disabled(tile.isMatched)
             }
+        }
+    }
+
+    private func tileBackground(_ tile: MatchingPuzzleEngine.Tile) -> some ShapeStyle {
+        if tile.isMatched {
+            return AnyShapeStyle(AppTheme.success.opacity(0.25))
+        } else if tile.isRevealed {
+            return AnyShapeStyle(AppTheme.accent.opacity(0.15))
+        } else {
+            return AnyShapeStyle(AppTheme.heroGradient)
         }
     }
 
@@ -187,13 +219,21 @@ struct PatternGridView: View {
     var body: some View {
         VStack(spacing: 16) {
             if engine.isShowingPattern {
-                Text("Watch the pattern...")
-                    .font(.headline)
-                    .foregroundColor(.orange)
+                HStack(spacing: 6) {
+                    Image(systemName: "eye.fill")
+                        .font(.subheadline)
+                    Text("Watch the pattern")
+                }
+                .font(.subheadline.weight(.semibold))
+                .foregroundColor(AppTheme.accent)
             } else {
-                Text("Repeat the pattern! (\(engine.playerInput.count)/\(engine.patternLength))")
-                    .font(.headline)
-                    .foregroundColor(.primary)
+                HStack(spacing: 6) {
+                    Image(systemName: "hand.tap.fill")
+                        .font(.subheadline)
+                    Text("Repeat: \(engine.playerInput.count)/\(engine.patternLength)")
+                }
+                .font(.subheadline.weight(.semibold))
+                .foregroundColor(AppTheme.textPrimary)
             }
 
             LazyVGrid(columns: columns, spacing: 8) {
@@ -201,13 +241,14 @@ struct PatternGridView: View {
                     Button {
                         engine.tapCell(index)
                     } label: {
-                        RoundedRectangle(cornerRadius: 10)
+                        RoundedRectangle(cornerRadius: 12)
                             .fill(cellColor(for: index))
                             .aspectRatio(1, contentMode: .fit)
                             .overlay(
-                                Text("🐱")
-                                    .font(.title2)
-                                    .opacity(isHighlighted(index) ? 1 : 0.2)
+                                Image(systemName: "pawprint.fill")
+                                    .font(.title3)
+                                    .foregroundColor(.white)
+                                    .opacity(isHighlighted(index) ? 1 : 0.15)
                             )
                     }
                     .disabled(engine.isShowingPattern)
@@ -225,12 +266,12 @@ struct PatternGridView: View {
 
     private func cellColor(for index: Int) -> Color {
         if isHighlighted(index) {
-            return .orange
+            return AppTheme.accent
         }
         if engine.playerInput.contains(index) {
-            return .green.opacity(0.3)
+            return AppTheme.success.opacity(0.4)
         }
-        return .orange.opacity(0.15)
+        return AppTheme.accent.opacity(0.1)
     }
 }
 
@@ -244,24 +285,31 @@ struct SlidingGridView: View {
         Array(repeating: GridItem(.flexible(), spacing: 4), count: gridSize)
     }
 
-    private let catParts = ["😺", "😸", "😻", "😽", "🙀", "😹", "😾", "😿", "🐱", "😼", "🐈", "🐈‍⬛", "🐾", "🧶", "🐟", "🎣", "🥛", "🐭", "🪶", "🧸", "🛋️", "📦", "🌿", "🐦"]
+    private let tileSymbols = [
+        "cat.fill", "hare.fill", "bird.fill", "fish.fill", "tortoise.fill",
+        "ant.fill", "ladybug.fill", "leaf.fill", "star.fill", "heart.fill",
+        "moon.fill", "sun.max.fill", "cloud.fill", "bolt.fill", "drop.fill",
+        "flame.fill", "snowflake", "wind", "sparkle", "circle.hexagongrid.fill",
+        "diamond.fill", "triangle.fill", "pentagon.fill", "hexagon.fill"
+    ]
 
     var body: some View {
         LazyVGrid(columns: columns, spacing: 4) {
             ForEach(0..<engine.tiles.count, id: \.self) { index in
                 Button {
-                    withAnimation(.easeInOut(duration: 0.15)) {
+                    withAnimation(.spring(response: 0.2, dampingFraction: 0.8)) {
                         engine.tapTile(at: index)
                     }
                 } label: {
                     ZStack {
-                        RoundedRectangle(cornerRadius: 8)
-                            .fill(engine.tiles[index] == 0 ? Color.clear : Color.orange)
+                        RoundedRectangle(cornerRadius: 10)
+                            .fill(engine.tiles[index] == 0 ? Color.clear : AppTheme.heroGradient)
                             .aspectRatio(1, contentMode: .fit)
 
                         if engine.tiles[index] != 0 {
-                            Text(catParts[(engine.tiles[index] - 1) % catParts.count])
-                                .font(.system(size: tileFontSize))
+                            Image(systemName: tileSymbols[(engine.tiles[index] - 1) % tileSymbols.count])
+                                .font(.system(size: tileFontSize, weight: .semibold))
+                                .foregroundColor(.white)
                         }
                     }
                 }
@@ -272,9 +320,9 @@ struct SlidingGridView: View {
 
     private var tileFontSize: CGFloat {
         switch gridSize {
-        case 3: return 30
-        case 4: return 24
-        default: return 20
+        case 3: return 26
+        case 4: return 20
+        default: return 16
         }
     }
 }
@@ -287,43 +335,45 @@ struct LevelCompleteView: View {
     let onDismiss: () -> Void
 
     var body: some View {
-        VStack(spacing: 24) {
-            Text("🎉")
-                .font(.system(size: 60))
+        VStack(spacing: 28) {
+            ZStack {
+                Circle()
+                    .fill(AppTheme.accent.opacity(0.1))
+                    .frame(width: 80, height: 80)
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 44))
+                    .foregroundStyle(AppTheme.heroGradient)
+            }
 
-            Text("Level Complete!")
-                .font(.title.bold())
+            Text("Level Complete")
+                .font(.title2.weight(.bold))
+                .foregroundColor(AppTheme.textPrimary)
 
-            HStack(spacing: 8) {
+            HStack(spacing: 10) {
                 ForEach(1...3, id: \.self) { i in
                     Image(systemName: i <= stars ? "star.fill" : "star")
-                        .font(.system(size: 36))
-                        .foregroundColor(i <= stars ? .yellow : .gray.opacity(0.3))
+                        .font(.system(size: 32, weight: .semibold))
+                        .foregroundColor(i <= stars ? AppTheme.gold : AppTheme.textSecondary.opacity(0.2))
                 }
             }
 
-            HStack(spacing: 4) {
-                Text("🐟")
-                    .font(.title2)
+            HStack(spacing: 6) {
+                Image(systemName: "dollarsign.circle.fill")
+                    .foregroundColor(AppTheme.coinColor)
                 Text("+\(coins)")
-                    .font(.title.bold())
-                    .foregroundColor(.orange)
+                    .font(.title2.weight(.bold))
+                    .foregroundColor(AppTheme.coinColor)
             }
 
             Button {
                 onDismiss()
             } label: {
                 Text("Continue")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.orange)
-                    .foregroundColor(.white)
-                    .cornerRadius(14)
+                    .accentButton()
             }
             .padding(.horizontal, 40)
         }
-        .padding()
+        .padding(24)
         .presentationDetents([.medium])
     }
 }

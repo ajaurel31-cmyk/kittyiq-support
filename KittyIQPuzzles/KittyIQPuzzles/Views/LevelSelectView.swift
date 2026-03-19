@@ -9,15 +9,26 @@ struct LevelSelectView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 20) {
-                // World header
-                Text(world.emoji)
-                    .font(.system(size: 60))
-                Text(world.name)
-                    .font(.title.bold())
+            VStack(spacing: 24) {
+                // World hero
+                ZStack {
+                    RoundedRectangle(cornerRadius: 22)
+                        .fill(AppTheme.worldGradient(for: world.theme))
+                        .frame(height: 120)
+
+                    VStack(spacing: 6) {
+                        Image(systemName: AppTheme.worldIcon(for: world.theme))
+                            .font(.system(size: 36, weight: .semibold))
+                            .foregroundColor(.white)
+                        Text(world.name)
+                            .font(.title3.weight(.bold))
+                            .foregroundColor(.white)
+                    }
+                }
+                .padding(.horizontal)
 
                 // Level grid
-                LazyVGrid(columns: columns, spacing: 12) {
+                LazyVGrid(columns: columns, spacing: 14) {
                     ForEach(world.levels) { level in
                         LevelButton(level: level, world: world)
                     }
@@ -26,6 +37,7 @@ struct LevelSelectView: View {
             }
             .padding(.vertical)
         }
+        .background(AppTheme.surface.ignoresSafeArea())
         .navigationTitle(world.name)
         .navigationBarTitleDisplayMode(.inline)
     }
@@ -38,7 +50,6 @@ struct LevelButton: View {
     @EnvironmentObject var storeManager: StoreManager
 
     private var isUnlocked: Bool {
-        // Premium levels beyond free tier
         if world.requiresPremium && !storeManager.isPremium {
             if world.id == 2 && level.id <= 5 {
                 return gameState.isLevelUnlocked(worldId: world.id, levelId: level.id)
@@ -60,28 +71,29 @@ struct LevelButton: View {
                 PremiumUpsellView()
             }
         } label: {
-            VStack(spacing: 4) {
+            VStack(spacing: 6) {
                 ZStack {
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(isUnlocked ? Color.orange : Color.gray.opacity(0.2))
-                        .frame(width: 54, height: 54)
+                        .fill(isUnlocked ? AppTheme.worldGradient(for: world.theme) : LinearGradient(colors: [Color.gray.opacity(0.12), Color.gray.opacity(0.08)], startPoint: .top, endPoint: .bottom))
+                        .frame(width: 52, height: 52)
 
                     if isUnlocked {
                         Text("\(level.id)")
-                            .font(.headline.bold())
+                            .font(.headline.weight(.bold))
                             .foregroundColor(.white)
                     } else {
                         Image(systemName: "lock.fill")
-                            .foregroundColor(.gray)
+                            .font(.caption)
+                            .foregroundColor(AppTheme.textSecondary.opacity(0.5))
                     }
                 }
 
                 // Stars
-                HStack(spacing: 1) {
+                HStack(spacing: 2) {
                     ForEach(1...3, id: \.self) { i in
                         Image(systemName: i <= stars ? "star.fill" : "star")
-                            .font(.system(size: 8))
-                            .foregroundColor(i <= stars ? .yellow : .gray.opacity(0.3))
+                            .font(.system(size: 8, weight: .semibold))
+                            .foregroundColor(i <= stars ? AppTheme.gold : AppTheme.textSecondary.opacity(0.25))
                     }
                 }
             }

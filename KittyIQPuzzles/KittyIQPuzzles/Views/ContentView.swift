@@ -8,25 +8,25 @@ struct ContentView: View {
         TabView {
             WorldMapView()
                 .tabItem {
-                    Label("Worlds", systemImage: "map.fill")
+                    Label("Worlds", systemImage: "globe.americas.fill")
                 }
 
             CollectionView()
                 .tabItem {
-                    Label("Collection", systemImage: "book.fill")
+                    Label("Collection", systemImage: "square.grid.2x2.fill")
                 }
 
             OutfitShopView()
                 .tabItem {
-                    Label("Outfits", systemImage: "tshirt.fill")
+                    Label("Style", systemImage: "sparkles")
                 }
 
             ProfileView()
                 .tabItem {
-                    Label("Profile", systemImage: "person.fill")
+                    Label("Profile", systemImage: "person.crop.circle.fill")
                 }
         }
-        .tint(.orange)
+        .tint(AppTheme.accent)
     }
 }
 
